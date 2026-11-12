@@ -65,4 +65,3 @@ def validate_checkout_data(tools:list,tool_id:int,name:str)->bool:
         return True
     else:
         return False
-
