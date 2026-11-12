@@ -1,5 +1,5 @@
-from tools_data import tools
-from tool_rules import get_available_tools, checkout_tool, find_tool_by_id, validate_borrower_name, validate_tool_id, validate_checkout_data
+from tool_library.tools_data import tools
+from tool_library.tool_rules import get_available_tools, checkout_tool, find_tool_by_id, validate_borrower_name, validate_tool_id, validate_checkout_data
 
 
 # Session 5: Find and Filter Records
