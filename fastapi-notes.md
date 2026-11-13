@@ -212,4 +212,13 @@ Expected response:
 | Swagger UI | Interactive API documentation |
 | ReDoc | Alternative API documentation |
 
+
+## 13. HTTP Methods in FastAPI
+
+| HTTP method | FastAPI syntax |
+|---|---|
+| GET | `@app.get()` |
+| POST | `@app.post()` |
+| PUT | `@app.put()` |
+| DELETE | `@app.delete()` |
  
