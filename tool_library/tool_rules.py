@@ -28,11 +28,7 @@ def get_available_tools(tools:list)->list:
 
 #Session 7 — Reject Incomplete Checkout Data
 def validate_borrower_name(name:str)->bool:
-    name=name.strip()
-    if name == "":
-        return False
-    else:
-        return True
+    return name.strip() !=''
 
 #print(validate_borrower_name(name))
 
