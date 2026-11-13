@@ -25,6 +25,8 @@ def get_tool(tool_id: int):
 
 @app.post("/tools")
 def create_tool(tool: Tool):
+    new_tool=tool.model_dump()
+    tools.append(new_tool)
     return {"message": "Tool received successfully", "tool": tool}
 
 
