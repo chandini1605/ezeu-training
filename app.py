@@ -1,8 +1,15 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 from tool_library.tools_data import tools
 from tool_library.tool_rules import find_tool_by_id
 
 app = FastAPI()
+
+class Tool(BaseModel):
+    id:int
+    name:str
+    category:str
+    available:bool
 
 @app.get("/")
 def home():
@@ -17,7 +24,7 @@ def get_tool(tool_id: int):
     return find_tool_by_id(tools, tool_id)
 
 @app.post("/tools")
-def create_tool(tool: dict):
+def create_tool(tool: Tool):
     return {"message": "Tool received successfully", "tool": tool}
 
 
@@ -28,3 +35,5 @@ def update_tool(tool_id: int):
 @app.delete("/tools/{tool_id}")
 def delete_tool(tool_id: int):
     return {"message": f"Tool {tool_id} deletion requested"}
+
+
