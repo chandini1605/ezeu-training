@@ -1,5 +1,6 @@
 from sqlalchemy import Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import func
 
 from tool_library.database import Base
 
@@ -28,8 +29,9 @@ class Checkout(Base):
     borrower_name: Mapped[str] = mapped_column(String(100), nullable=False)
 
     borrowed_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False
+    DateTime,
+    server_default=func.current_timestamp(),
+    nullable=False
     )
 
     returned_at: Mapped[datetime | None] = mapped_column(

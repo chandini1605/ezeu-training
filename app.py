@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from tool_library.tools_data import tools
 from tool_library.tool_rules import find_tool_by_id
 from tool_library.models import Tool as ToolModel
+from tool_library.models import Checkout as CheckoutModel
+from datetime import datetime
 
 app = FastAPI()
 
@@ -19,6 +21,9 @@ class ToolCreate(BaseModel):
     name: str
     category: str
     available: bool
+
+class CheckoutCreate(BaseModel):
+    borrower_name: str
 
 @app.get("/")
 def home():
@@ -69,3 +74,84 @@ def delete_tool(tool_id: int,db: Session = Depends(get_db)):
     db.delete(deleting_tool)
     db.commit()
     return {"message": f"Tool {tool_id} deleted successfully"}
+
+
+@app.post("/tools/{tool_id}/checkout")
+def checkout_tool(
+    tool_id: int,
+    checkout: CheckoutCreate,
+    db: Session = Depends(get_db)
+):
+    existing_tool = db.query(ToolModel).filter(
+    ToolModel.id == tool_id).first()
+    if existing_tool is None:
+        raise HTTPException(status_code=404, detail="Tool not found")
+    # Check whether the tool is available
+    if not existing_tool.available:
+        raise HTTPException(
+            status_code=400,
+            detail="Tool is already checked out"
+        )
+    # Mark the tool as unavailable
+    existing_tool.available = False
+    # Create a checkout record
+    new_checkout = CheckoutModel(
+        tool_id=tool_id,
+        borrower_name=checkout.borrower_name
+    )
+
+    # Save checkout record to PostgreSQL
+    db.add(new_checkout)
+    db.commit()
+    db.refresh(new_checkout)
+
+    return {
+        "message": "Tool checked out successfully",
+        "checkout": new_checkout
+    }
+
+# Session 24 - Return a checkout
+
+@app.post("/checkouts/{checkout_id}/return")
+def return_checkout(
+    checkout_id: int,
+    db: Session = Depends(get_db)
+):
+    # Find the checkout record
+    existing_checkout = db.query(CheckoutModel).filter(
+        CheckoutModel.id == checkout_id
+    ).first()
+
+    # Check whether the checkout exists
+    if existing_checkout is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Checkout not found"
+        )
+
+    # Check whether the tool was already returned
+    if existing_checkout.returned_at is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Tool has already been returned"
+        )
+
+    # Find the associated tool
+    existing_tool = db.query(ToolModel).filter(
+        ToolModel.id == existing_checkout.tool_id
+    ).first()
+
+    # Update the return timestamp
+    existing_checkout.returned_at = datetime.now()
+
+    # Make the tool available again
+    existing_tool.available = True
+
+    # Save changes to the database
+    db.commit()
+    db.refresh(existing_checkout)
+
+    return {
+        "message": "Tool returned successfully",
+        "checkout": existing_checkout
+    }
